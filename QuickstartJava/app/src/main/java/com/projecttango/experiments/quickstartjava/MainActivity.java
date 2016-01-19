@@ -16,6 +16,16 @@
 
 package com.projecttango.experiments.quickstartjava;
 
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
 import com.google.atap.tangoservice.TangoConfig;
@@ -27,15 +37,11 @@ import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
 import com.projecttango.quickstartjava.R;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import java.util.ArrayList;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 
 /**
  * Main Activity for the Tango Java Quickstart. Demonstrates establishing a
@@ -44,30 +50,42 @@ import java.util.ArrayList;
  * {@link TangoConfig}.
  */
 public class MainActivity extends Activity {
+
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private static final String sTranslationFormat = "Translation: %f, %f, %f";
+
     private static final String sRotationFormat = "Rotation: %f, %f, %f, %f";
 
     private static final int SECS_TO_MILLISECS = 1000;
+
     private static final double UPDATE_INTERVAL_MS = 100.0;
 
     private double mPreviousTimeStamp;
+
     private double mTimeToNextUpdate = UPDATE_INTERVAL_MS;
 
-    private TextView mTranslationTextView;
-    private TextView mRotationTextView;
-
     private Tango mTango;
+
     private TangoConfig mConfig;
+
     private boolean mIsTangoServiceConnected;
+
+    @Bind(R.id.container)
+    LinearLayout container;
+
+    @Bind(R.id.translation_text_view)
+    TextView mTranslationTextView;
+
+    @Bind(R.id.rotation_text_view)
+    TextView mRotationTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mTranslationTextView = (TextView) findViewById(R.id.translation_text_view);
-        mRotationTextView = (TextView) findViewById(R.id.rotation_text_view);
+        ButterKnife.bind(this);
 
         // Instantiate Tango client
         mTango = new Tango(this);
@@ -82,6 +100,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onResume() {
+
         super.onResume();
         // Lock the Tango configuration and reconnect to the service each time
         // the app
@@ -90,27 +109,29 @@ public class MainActivity extends Activity {
         if (!mIsTangoServiceConnected) {
             try {
                 setTangoListeners();
-            } catch (TangoErrorException e) {
-                Toast.makeText(this, "Tango Error! Restart the app!",
-                        Toast.LENGTH_SHORT).show();
+            }
+            catch (TangoErrorException e) {
+                Snackbar.make(container, "Tango Error! Restart the app!", Snackbar.LENGTH_SHORT).show();
             }
             try {
                 mTango.connect(mConfig);
                 mIsTangoServiceConnected = true;
-            } catch (TangoOutOfDateException e) {
-                Toast.makeText(getApplicationContext(),
-                        "Tango Service out of date!", Toast.LENGTH_SHORT)
-                        .show();
-            } catch (TangoErrorException e) {
-                Toast.makeText(getApplicationContext(),
-                        "Tango Error! Restart the app!", Toast.LENGTH_SHORT)
-                        .show();
             }
+            catch (TangoOutOfDateException e) {
+                Snackbar.make(container, "Tango Service out of date!", Snackbar.LENGTH_SHORT).show();
+            }
+            catch (TangoErrorException e) {
+                Snackbar.make(container, "Tango Error! Restart the app!", Snackbar.LENGTH_SHORT).show();
+            }
+        }
+        else {
+            Snackbar.make(container, "Tango service connected", Snackbar.LENGTH_SHORT).show();
         }
     }
 
     @Override
     protected void onPause() {
+
         super.onPause();
         // When the app is pushed to the background, unlock the Tango
         // configuration and disconnect
@@ -118,14 +139,16 @@ public class MainActivity extends Activity {
         try {
             mTango.disconnect();
             mIsTangoServiceConnected = false;
-        } catch (TangoErrorException e) {
+        }
+        catch (TangoErrorException e) {
             Toast.makeText(getApplicationContext(), "Tango Error!",
-                    Toast.LENGTH_SHORT).show();
+                           Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     protected void onDestroy() {
+
         super.onDestroy();
     }
 
@@ -144,11 +167,11 @@ public class MainActivity extends Activity {
             public void onPoseAvailable(TangoPoseData pose) {
                 // Format Translation and Rotation data
                 final String translationMsg = String.format(sTranslationFormat,
-                        pose.translation[0], pose.translation[1],
-                        pose.translation[2]);
+                                                            pose.translation[0], pose.translation[1],
+                                                            pose.translation[2]);
                 final String rotationMsg = String.format(sRotationFormat,
-                        pose.rotation[0], pose.rotation[1], pose.rotation[2],
-                        pose.rotation[3]);
+                                                         pose.rotation[0], pose.rotation[1], pose.rotation[2],
+                                                         pose.rotation[3]);
 
                 // Output to LogCat
                 String logMsg = translationMsg + " | " + rotationMsg;
@@ -171,6 +194,7 @@ public class MainActivity extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+
                             mRotationTextView.setText(rotationMsg);
                             mTranslationTextView.setText(translationMsg);
                         }
@@ -188,11 +212,11 @@ public class MainActivity extends Activity {
                 // Ignoring TangoEvents
             }
 
-			@Override
-			public void onFrameAvailable(int arg0) {
-				// Ignoring onFrameAvailable Events
-				
-			}
+            @Override
+            public void onFrameAvailable(int arg0) {
+                // Ignoring onFrameAvailable Events
+
+            }
 
         });
     }

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
+    compileSdkVersion 23
     buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "com.projecttango.experiments.javaquickstart"
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -33,4 +33,6 @@ if (project.hasProperty("Tango.catkin_devel_prefix")) {
 
 dependencies {
     compile fileTree(dir: external_lib_prefix + '/jar', include: ['**/*.jar'])
+    compile "com.android.support:design:23.1.1";
+    compile "com.jakewharton:butterknife:7.0.1"
 }
